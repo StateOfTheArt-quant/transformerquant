@@ -26,9 +26,9 @@ class BertConfig(PretrainedConfig):
     
     
     def __init__(self,
-                 d_model=50,
+                 d_model=126,
                  num_layers=12,
-                 nhead=12,
+                 nhead=6,
                  activation="gelu",
                  hidden_dropout_prob=0.1,
                  attention_dropout_prob=0.1,

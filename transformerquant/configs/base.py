@@ -6,7 +6,7 @@ import logging
 import os
 from io import open
 
-from transformerquant.utils import cached_path, CONFIG_NAME
+from transformerquant.utils.path import cached_path, CONFIG_NAME
 from transformerquant.interface import AbstractConfig
 
 logger = logging.getLogger(__name__)

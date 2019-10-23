@@ -9,7 +9,8 @@ if not os.path.isdir(to_save_path):
     os.mkdir(to_save_path)
     
 
-bert_config = BertConfig
+bert_config = BertConfig()
 
 bert_pretraining_model = BertForPreTraining(bert_config)
 
+bert_sequence_classifier_model = BertForSequenceClassification(bert_config)

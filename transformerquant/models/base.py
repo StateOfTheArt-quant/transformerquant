@@ -34,7 +34,7 @@ from torch.nn import CrossEntropyLoss
 from torch.nn import functional as F
 import pdb
 from transformerquant.configs.base import PretrainedConfig
-from transformerquant.utils import cached_path, WEIGHTS_NAME, TF_WEIGHTS_NAME, TF2_WEIGHTS_NAME
+from transformerquant.utils.path import cached_path, WEIGHTS_NAME, TF_WEIGHTS_NAME, TF2_WEIGHTS_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +58,6 @@ class PreTrainedModel(nn.Module):
 
     def __init__(self, config, *inputs, **kwargs):
         super(PreTrainedModel, self).__init__()
-        pdb.set_trace()
         if not isinstance(config, PretrainedConfig):
             raise ValueError(
                 "Parameter config in `{}(config)` should be an instance of class `PretrainedConfig`. "

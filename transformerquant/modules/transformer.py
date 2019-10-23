@@ -27,6 +27,7 @@ class TransformerEncoderLayer(nn.Module):
 class TransformerEncoder(nn.Module):
     
     def __init__(self, encoder_layer, num_layers):
+        super().__init__()
         self.layers = clones(encoder_layer, num_layers)
         self.norm = LayerNorm(encoder_layer.size)
     

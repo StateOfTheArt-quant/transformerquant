@@ -163,10 +163,10 @@ class ResidualBertModel(BertPreTrainedModel):
         self.encoder = ResidualBERT(d_model = config.d_model,
                                     num_layers=config.num_layers,
                                     nhead=config.nhead,
-                                    dropout=config.attention_probs_dropout_prob,
+                                    dropout=config.attention_dropout_prob,
                                     activation=config.activation)
         self.pooler = BertPooler(in_features=config.d_model, out_features=config.d_model)
-        self.init_weight()
+        self.init_weights()
     
     def forward(self, x, mask=None):
         x = self.encoder(x,mask)
@@ -184,7 +184,7 @@ class BertForPreTraining(BertPreTrainedModel):
         self.bert = ResidualBertModel(config)
         self.cls = BertLMPredictionHead(in_features=config.d_model, out_features=config.num_labels, activation_func=config.activation, layer_norm_eps=config.layer_norm_eps)
         
-        self.init_weight()
+        self.init_weights()
     
     def forward(self, x, mask=None):
         x = self.bert(x, mask)
@@ -204,10 +204,13 @@ class BertForSequenceClassification(BertPreTrainedModel):
                                  nhead=config.nhead,
                                  dropout=config.attention_dropout_prob,
                                  activation=config.activation)
+        self.pooler = BertPooler(in_features=config.d_model, out_features=config.d_model)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
         self.classifier = nn.Linear(config.d_model, config.num_labels)
     
-    def forward(self, x, mask):
+    def forward(self, x, mask=None):
         x = self.bert(x, mask)
+        x =  self.pooler(x)
+        x = self.dropout(x)
         logit = self.classifier(x)
-        return logit 
+        return logit.squeeze(-1) 

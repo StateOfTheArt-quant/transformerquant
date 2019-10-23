@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Utilities for working with the local dataset cache.
 This file is adapted from the AllenNLP library at https://github.com/allenai/allennlp
