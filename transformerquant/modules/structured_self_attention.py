@@ -75,9 +75,9 @@ class StructuredSelfAttention(torch.nn.Module):
         x = F.softmax(x, 1)
         attention = x.transpose(1,2) #batch_size x r x seq_window
         
-        sentence_embeddings =attention@lstm_outputs   #batch_size x r x lstm_hid_dim # == attention.bmm(lstm_outputs)  #batch matrix-matrix product of matrix
-        avg_sentence_embeddings = torch.sum(sentence_embeddings,1)/self.r  # batch_size x lstm_hid_dim
-        output = self.linear_final(avg_sentence_embeddings)
+        multi_head_context =attention@lstm_outputs   #batch_size x r x lstm_hid_dim # == attention.bmm(lstm_outputs)  #batch matrix-matrix product of matrix
+        avg_context = torch.sum(multi_head_context,1)/self.r  # batch_size x lstm_hid_dim
+        output = self.linear_final(avg_context)
 
         return output, attention #batch_size x output_dim
 

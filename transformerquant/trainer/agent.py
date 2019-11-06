@@ -18,6 +18,7 @@
 import os
 import time
 import datetime
+import logging
 import pdb
 import numpy as np
 import torch
@@ -32,9 +33,9 @@ try:
     from tensorboardX import SummaryWriter
 except ImportError:
     raise RuntimeError('no tensorboardX package found')
-from prophet.utils.logger import get_logger
-from prophet.utils.datetime_converter import _to_hours_mins_secs
+from transformerquant.utils.datetime_converter import _to_hours_mins_secs
 
+logger = logging.getLogger(__name__)
 
 class State(object):
     """An object that is used to pass internal and user-defined state between event handlers."""
@@ -161,7 +162,6 @@ class Agent(object):
         self._trainer = None
         self._evaluator = None
         #
-        self._logger = get_logger(__name__)
         use_cuda = use_cuda and torch.cuda.is_available()
         self.device = torch.device('cuda' if use_cuda else 'cpu')
         #
@@ -188,13 +188,13 @@ class Agent(object):
         self.log_dir = kwargs.pop('log_dir', os.path.join(to_save_dir,'log'))
         now = datetime.datetime.now()
         self.to_save_dir = os.path.join(to_save_dir, "training_{}_{}".format(self.model_name, now.strftime("%Y%m%d_%H%M%S")))
-        self._logger.info("the dir to save model is {}".format(self.to_save_dir))
+        logger.info("the dir to save model is {}".format(self.to_save_dir))
         #
         checkpoint = kwargs.pop('checkpoint', None)
         if checkpoint is not None:
-            self._logger.info("model is to load checkpoint...")
+            logger.info("model is to load checkpoint...")
             self.model.load_state_dict(torch.load(checkpoint, map_location=self.device))
-            self._logger.info("model loaded checkpoint successfully")
+            logger.info("model loaded checkpoint successfully")
         #pdb.set_trace()
 
     def set_trainer(self, trainer=None):
@@ -246,12 +246,12 @@ class Agent(object):
         #
         trainer = self._trainer
         if trainer is None:
-            self._logger.info("loading default trainer in prophet")
+            logger.info("loading default trainer in prophet")
             trainer = self.create_default_trainer(loader_train)
         if loader_val is not None:
             evaluator = self._evaluator
             if evaluator is None:
-                self._logger.info("loading default evaluator in prophet")
+                logger.info("loading default evaluator in prophet")
                 evaluator = self.create_default_evaluator(loader_val)
 
         trainer = self._register_train_events(loader_train, loader_val, trainer, evaluator)
@@ -338,7 +338,6 @@ class AgentBase(object):
                  n_epochs=10,
                  **kwargs):
         
-        self._logger = get_logger(__name__)
         use_cuda = use_cuda and torch.cuda.is_available()
         self.device = torch.device('cuda' if use_cuda else 'cpu')
         
@@ -365,13 +364,13 @@ class AgentBase(object):
         self.log_dir = kwargs.pop('log_dir', os.path.join(to_save_dir,'log'))
         now = datetime.datetime.now()
         self.to_save_dir = os.path.join(to_save_dir, "training_{}_{}".format(self.model_name, now.strftime("%Y%m%d_%H%M%S")))
-        self._logger.info("the dir to save model is {}".format(self.to_save_dir))
+        logger.info("the dir to save model is {}".format(self.to_save_dir))
         #
         checkpoint = kwargs.pop('checkpoint', None)
         if checkpoint is not None:
-            self._logger.info("model is to load checkpoint...")
+            logger.info("model is to load checkpoint...")
             self.model.load_state_dict(torch.load(checkpoint, map_location=self.device))
-            self._logger.info("model loaded checkpoint successfully")
+            logger.info("model loaded checkpoint successfully")
     
     def fit(self, dataloader_train, dataloader_val=None):
         
@@ -417,15 +416,15 @@ class AgentBase(object):
                 
                 
                 if i % self.log_interval == 0:
-                    self._logger.info("epoch:{}, iteration:{}, loss:{:.5f}".format(self.state.epoch, i, loss.item()))
+                    logger.info("epoch:{}, iteration:{}, loss:{:.5f}".format(self.state.epoch, i, loss.item()))
                 
         except Exception as e:
-            self._logger.error("Current run is terminating due to exception: %s.", str(e))
+            logger.error("Current run is terminating due to exception: %s.", str(e))
         
         time_taken = time.time() - start_time
         hours, mins, secs = _to_hours_mins_secs(time_taken)
         self.state.loss_train = np.nanmean(loss_list)
-        self._logger.info("Epoch {} Complete. Time taken: {:.0f}:{:.0f}:{:.0f}, loss:{:.5f}".format(self.state.epoch, hours, mins, secs, self.state.loss_train))
+        logger.info("Epoch {} Complete. Time taken: {:.0f}:{:.0f}:{:.0f}, loss:{:.5f}".format(self.state.epoch, hours, mins, secs, self.state.loss_train))
         
         
         return hours, mins, secs
@@ -457,7 +456,7 @@ class AgentBase(object):
                     correct += (torch.argmax(y_pred, dim=1) == labels).sum().item()
             
             loss = np.nanmean(loss_list)
-            self._logger.info("[evaluate mode] loss on dataset:{:.5f}".format(loss))
+            logger.info("[evaluate mode] loss on dataset:{:.5f}".format(loss))
             self.state.loss_val = loss
             return loss
                 
@@ -488,4 +487,4 @@ class AgentBase(object):
                 pass
             self.best_score = score
             torch.save(self.model.state_dict(), os.path.join(self.to_save_dir, '{}_{}.pth'.format(self.model_name, self.best_score)))
-            self._logger.info("saveing best model")
+            logger.info("saveing best model")
